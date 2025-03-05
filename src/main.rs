@@ -1,5 +1,26 @@
+enum Token{
+    Number(f64),
+    Minus,
+    Plus,
+    Multply,
+    Divide,
+    EqualDouble,
+    NotEqual,
+    Greater,
+    GreaterEqual,
+    True,
+    False,
+    LeftParen,
+    RightParen,
+    Bang,
+    Less,
+    LessEqual,
+    Nil,
+}
+
+
 struct Parser<'a> {
-    tokens: &'a [char], 
+    tokens: &'a [Token], 
     pos: usize,
 }
 
@@ -14,8 +35,16 @@ impl<'a> Parser<'a> {
 
 
     fn term(&mut self) -> i32 {
-        let mut value = self.factor();
+        let mut value = self.equality();
         while self.match_token('*') {
+            value +=self.equality();
+        }
+        value
+    }
+
+    fn equality(&mut self) ->i32{
+        let mut value = self.factor();
+        while self.match_token('-'){
             value +=self.factor();
         }
         value
