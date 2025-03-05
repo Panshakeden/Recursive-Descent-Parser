@@ -1,9 +1,11 @@
+#[derive(Debug)]
 enum Token{
     Number(f64),
     Minus,
     Plus,
     Multply,
     Divide,
+    modulus,
     EqualDouble,
     NotEqual,
     Greater,
@@ -25,12 +27,8 @@ struct Parser<'a> {
 }
 
 impl<'a> Parser<'a> {
-    fn expr(&mut self) -> i32 {
-        let mut value = self.term();
-        while self.match_token('+') {
-            value += self.term(); 
-        }
-        value
+    fn expr(&mut self) ->i32  {
+            self.equality();
     }
 
 
@@ -43,11 +41,34 @@ impl<'a> Parser<'a> {
     }
 
     fn equality(&mut self) ->i32{
-        let mut value = self.factor();
-        while self.match_token('-'){
-            value +=self.factor();
+        let mut left_value = self.comparison();
+        while let Some(op)=self.match_token(&[Token::EqualDouble, Token::NotEqual]){
+            let right_value= self.comparison();
+            
+            left_value= match op {
+                Token::EqualDouble => (left_value ==right_value) as i32,
+                Token::NotEqual => (left_value != right_value) as i32,
+                _ => (),
+            };
         }
-        value
+      left_value
+        
+    }
+
+    fn comparison() ->i32 {
+        let mut left_value = self.term();
+        while let Some(op)= self.match_token(&[Token::Greater,Token::Less,Token::GreaterEqual,LessEqual]){
+            let right_value = self.term();
+            left_value = match op{
+                Token::Greater => (left_value > right_value) as i32,
+                Token::Less => (left_value < right_value) as i32,
+                Token::LessEqual => (left_value <= right_value) as i32,
+                Token::GreaterEqual => (left_value >= right_value) as i32,
+                _ => ()
+            }
+        }
+        left_value
+         
     }
 
     fn factor(&mut self) ->i32{
