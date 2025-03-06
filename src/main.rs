@@ -1,11 +1,11 @@
-#[derive(Debug)]
+#[derive(Debug,PartialEq)]
 enum Token{
     Number(f64),
     Minus,
     Plus,
     Multply,
     Divide,
-    modulus,
+    Modulus,
     EqualDouble,
     NotEqual,
     Greater,
@@ -28,17 +28,9 @@ struct Parser<'a> {
 
 impl<'a> Parser<'a> {
     fn expr(&mut self) ->i32  {
-            self.equality();
+            self.equality()
     }
 
-
-    fn term(&mut self) -> i32 {
-        let mut value = self.equality();
-        while self.match_token('*') {
-            value +=self.equality();
-        }
-        value
-    }
 
     fn equality(&mut self) ->i32{
         let mut left_value = self.comparison();
@@ -48,27 +40,39 @@ impl<'a> Parser<'a> {
             left_value= match op {
                 Token::EqualDouble => (left_value ==right_value) as i32,
                 Token::NotEqual => (left_value != right_value) as i32,
-                _ => (),
+                _ => () as i32,
             };
         }
       left_value
         
     }
 
-    fn comparison() ->i32 {
+    fn comparison(&mut self) ->i32 {
         let mut left_value = self.term();
-        while let Some(op)= self.match_token(&[Token::Greater,Token::Less,Token::GreaterEqual,LessEqual]){
+        while let Some(op)= self.match_token(&[Token::Greater,Token::Less,Token::GreaterEqual,Token::LessEqual]){
             let right_value = self.term();
             left_value = match op{
                 Token::Greater => (left_value > right_value) as i32,
                 Token::Less => (left_value < right_value) as i32,
                 Token::LessEqual => (left_value <= right_value) as i32,
                 Token::GreaterEqual => (left_value >= right_value) as i32,
-                _ => ()
+                _ => () as i32,
             }
         }
         left_value
          
+    }
+
+    fn term(&mut self) -> i32 {
+        let mut left_value = self.factor();
+         while let Some(op) = self.match_token(&[Token::Minus,Token::Plus]){
+            let right_value=self.factor();
+            left_value= match op{
+            Token::Minus => (left_value - right_value) as i32,
+            Token::Plus => (left_value - right_value) as i32,
+            _ => ()
+            }
+         }
     }
 
     fn factor(&mut self) ->i32{
