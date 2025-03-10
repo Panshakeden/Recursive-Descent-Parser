@@ -17,8 +17,13 @@ enum Token{
     Bang,
     Less,
     LessEqual,
-    Nil,
-}
+    if self.match_token('('){
+        let value =self.expr();
+        self.match_token(')');
+        value
+    }else{
+        self.number()
+    }}
 
 
 struct Parser<'a> {
@@ -73,16 +78,33 @@ impl<'a> Parser<'a> {
             _ => ()
             }
          }
+         left_value
     }
 
     fn factor(&mut self) ->i32{
-        if self.match_token('('){
-            let value =self.expr();
-            self.match_token(')');
-            value
-        }else{
-            self.number()
+      let left_value= self.unary();
+      while let Some(op) = self.match_token(&[Token::Multply,Token::Modulus,Token::Divide]){
+       let right_value= self.unary();
+
+       let left_value = match op{
+        Token::Multply => left_value * right_value,
+        Token::Modulus => left_value % right_value,
+        Token::Divide => left_value / right_value,
+        _ => (),
+       }
+      }
+      left_value
+    }
+
+    fn unary(&mut self) -> i32{
+        while let some(op) = self.match_token(&[Token::Bang,Token::Minus]){
+            let right_value= self.unary();
+
+            return match op{
+                
+            }
         }
+
     }
 
     fn number(&mut self) -> i32{
