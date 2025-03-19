@@ -5,7 +5,6 @@ enum Token{
     Plus,
     Multply,
     Divide,
-    Modulus,
     EqualDouble,
     NotEqual,
     Greater,
@@ -20,6 +19,7 @@ enum Token{
     Nil,
 }
 
+#[derive(Debug)]
 
 struct Parser<'a> {
     tokens: &'a [Token], 
@@ -78,12 +78,11 @@ impl<'a> Parser<'a> {
 
     fn factor(&mut self) ->f64{
       let left_value= self.unary();
-      while let Some(op) = self.match_token(&[Token::Multply,Token::Modulus,Token::Divide]){
+      while let Some(op) = self.match_token(&[Token::Multply,Token::Divide]){
        let right_value= self.unary();
 
        let left_value = match op{
         Token::Multply => left_value * right_value,
-        Token::Modulus => left_value % right_value,
         Token::Divide => left_value / right_value,
         _ => unreachable!(),
        };
@@ -157,5 +156,19 @@ impl<'a> Parser<'a> {
 
 
 fn main() {
-    println!("Hello, world!");
+    let tokens = vec![
+        Token::Number(8.0),
+        Token::Minus,
+        Token::Number(3.0),
+        // Token::LeftParen,
+        // Token::Number(8.0),
+        //Token::Multiply
+        // Token::Number(9.0),
+        // Token::RightParen,
+    ];
+    
+    let mut parser = Parser { tokens: &tokens, pos: 0 };
+    println!("Parser: {:?}", parser);
+    let result = parser.expression();
+    println!("Result: {}", result); 
 }
